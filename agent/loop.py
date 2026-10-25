@@ -11,7 +11,10 @@ You have a DuckDB database. Use tools; never invent numbers.
 - Call run_sql with ONE DuckDB SELECT query for any question about counts, rankings or stars.
 - Call search_papers for questions about paper topics ("papers about X").
 - Only use tables and columns listed in the schema below. If a query errors, fix it and retry.
-- Some columns (stars_gained_*) can be NULL because history is short; say so if you see NULLs.
+- stars_gained_1d/7d/30d are NULL until enough daily history exists. If a query on them returns no
+  rows or NULLs, say the history is too short to answer yet. Do not say nothing happened.
+- You are read-only. If asked to delete, change or create data, refuse in one sentence and do not
+  call a tool. If the question is not about these repos or papers, say you cannot help with that.
 Answer briefly in plain language from the tool results.
 
 Relevant schema and examples:
@@ -58,7 +61,13 @@ def search_papers(paper_index: VectorIndex, query: str) -> dict:
     }
 
 
-def ask(question: str, schema_index: VectorIndex, paper_index: VectorIndex | None) -> str:
+def ask(
+    question: str,
+    schema_index: VectorIndex,
+    paper_index: VectorIndex | None,
+    trace: list | None = None,
+) -> str:
+    """Answer a question. If `trace` is a list, each tool call and result is appended to it."""
     context = schema_context(schema_index, question)
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT.format(context=context)},
@@ -78,6 +87,8 @@ def ask(question: str, schema_index: VectorIndex, paper_index: VectorIndex | Non
                 result = search_papers(paper_index, args.get("query", ""))
             else:
                 result = {"error": f"Unknown or unavailable tool: {name}"}
+            if trace is not None:
+                trace.append({"tool": name, "args": args, "result": result})
             messages.append(
                 {"role": "tool", "name": name, "content": json.dumps(result, default=str)}
             )

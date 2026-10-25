@@ -29,6 +29,18 @@ def test_with_query_allowed():
     assert tools.check_sql("with a as (select 1 as x) select * from a")
 
 
+def test_null_growth_gets_a_note(tmp_path, monkeypatch):
+    db = tmp_path / "g.duckdb"
+    conn = duckdb.connect(str(db))
+    conn.execute("create table fct_repo_daily as select 1 as star_count, null::bigint as stars_gained_7d")
+    conn.close()
+    monkeypatch.setattr(tools, "DB_PATH", db)
+
+    result = tools.run_sql("select * from fct_repo_daily where stars_gained_7d is not null")
+    assert result["rows"] == []
+    assert "history" in result["note"]
+
+
 def test_run_sql_limits_rows_and_reports_errors(tmp_path, monkeypatch):
     db = tmp_path / "t.duckdb"
     conn = duckdb.connect(str(db))

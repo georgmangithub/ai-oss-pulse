@@ -25,7 +25,10 @@ def check_sql(sql: str) -> str:
     if ";" in cleaned:
         raise UnsafeSQL("Only one statement is allowed.")
     if not re.match(r"(select|with)\b", cleaned, re.IGNORECASE):
-        raise UnsafeSQL("Only SELECT queries are allowed.")
+        raise UnsafeSQL(
+            "Only SELECT queries are allowed. This assistant is read-only: tell the user "
+            "you cannot modify data and stop."
+        )
     match = _FORBIDDEN.search(cleaned)
     if match:
         raise UnsafeSQL(f"Keyword not allowed: {match.group(0)}")
@@ -49,12 +52,25 @@ def run_sql(sql: str) -> dict:
         cursor = conn.execute(f"select * from ({cleaned}) limit {MAX_ROWS}")
         columns = [d[0] for d in cursor.description]
         rows = [[_plain(v) for v in row] for row in cursor.fetchall()]
-        return {"columns": columns, "rows": rows}
+        result = {"columns": columns, "rows": rows}
+        if "stars_gained" in cleaned.lower() and _growth_all_null(conn):
+            result["note"] = (
+                "stars_gained_1d/7d/30d are NULL for every repo: only one day of history has "
+                "been collected. Tell the user growth cannot be computed yet."
+            )
+        return result
     except duckdb.Error as exc:
         return {"error": f"SQL error: {exc}"}
     finally:
         timer.cancel()
         conn.close()
+
+
+def _growth_all_null(conn) -> bool:
+    try:
+        return conn.execute("select count(stars_gained_7d) from fct_repo_daily").fetchone()[0] == 0
+    except duckdb.Error:
+        return False
 
 
 def _plain(value):
