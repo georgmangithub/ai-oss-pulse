@@ -6,3 +6,6 @@ pyarrow
 duckdb
 dbt-core
 dbt-duckdb
+ollama
+faiss-cpu
+numpy
