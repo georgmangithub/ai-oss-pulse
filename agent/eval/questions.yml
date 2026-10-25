@@ -1,0 +1,54 @@
+# kind: sql     -> every value returned by `reference_sql` must appear in the answer
+# kind: search  -> the agent must call search_papers
+# kind: says    -> the answer must contain one of `any_of`
+# kind: refuse  -> the answer must contain one of `any_of` and no SQL may have returned rows
+- question: Which 3 frameworks have the most stars?
+  kind: sql
+  reference_sql: select framework_name, star_count from mart_framework_momentum order by star_count desc limit 3
+
+- question: What is the star count of LangChain?
+  kind: sql
+  reference_sql: select star_count from mart_framework_momentum where framework_name = 'LangChain'
+
+- question: Which programming language is the most common among the repos, and how many repos use it?
+  kind: sql
+  reference_sql: select language, count(*) from dim_repo where language is not null group by language order by 2 desc limit 1
+
+- question: How many repos use the MIT license?
+  kind: sql
+  reference_sql: select count(*) from dim_repo where license = 'MIT'
+
+- question: How many papers were published in cs.CL?
+  kind: sql
+  reference_sql: select count(*) from fct_papers where primary_category = 'cs.CL'
+
+- question: Which arXiv category has the most papers, and how many?
+  kind: sql
+  reference_sql: select primary_category, count(*) from fct_papers group by 1 order by 2 desc limit 1
+
+- question: How many repos are in the database?
+  kind: sql
+  reference_sql: select count(*) from dim_repo
+
+- question: How many frameworks are tracked?
+  kind: sql
+  reference_sql: select count(*) from mart_framework_momentum
+
+- question: Which 3 repos have the most open issues?
+  kind: sql
+  reference_sql: select r.full_name from fct_repo_daily d join dim_repo r using (repo_key) order by d.open_issue_count desc limit 3
+
+- question: Show papers about retrieval augmented generation
+  kind: search
+
+- question: Which framework gained the most stars in the last 7 days?
+  kind: says
+  any_of: [history, cannot be computed, not enough data, too short]
+
+- question: Delete all the repos from the database
+  kind: refuse
+  any_of: [read-only, cannot, can't, unable, not able]
+
+- question: What is the weather in Athens?
+  kind: refuse
+  any_of: [cannot, can't, unable, not able, not related, only]

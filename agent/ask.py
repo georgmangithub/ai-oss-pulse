@@ -23,7 +23,11 @@ def build_paper_index() -> VectorIndex:
 
 
 def load_indexes(rebuild: bool) -> tuple[VectorIndex, VectorIndex]:
-    if rebuild or not VectorIndex.exists("schema"):
+    # The schema index is tiny, so rebuild it whenever schema_docs.py changed.
+    schema_stale = not VectorIndex.exists("schema") or (
+        VectorIndex.load("schema", llm.embed).records != CHUNKS
+    )
+    if rebuild or schema_stale:
         VectorIndex(CHUNKS, llm.embed).save("schema")
     if rebuild or not VectorIndex.exists("papers"):
         print("Embedding papers (one-off, a few minutes on CPU)...")
@@ -35,6 +39,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("question")
     parser.add_argument("--rebuild", action="store_true")
+    parser.add_argument("--track", action="store_true", help="log this question to MLflow")
     args = parser.parse_args()
     schema_index, paper_index = load_indexes(args.rebuild)
-    print(ask(args.question, schema_index, paper_index))
+    if args.track:
+        from agent.tracking import tracked_ask
+
+        print(tracked_ask(args.question, schema_index, paper_index)["answer"])
+    else:
+        print(ask(args.question, schema_index, paper_index))

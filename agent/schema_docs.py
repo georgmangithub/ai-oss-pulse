@@ -32,7 +32,9 @@ CHUNKS = [
             "dim_repo.repo_key), snapshot_date, star_count, fork_count, open_issue_count, pushed_at, "
             "stars_gained_1d, stars_gained_7d, stars_gained_30d (NULL until enough history). "
             "Use for star counts and growth across all repos; filter snapshot_date to the latest "
-            "date with (select max(snapshot_date) from fct_repo_daily) for current numbers."
+            "date with (select max(snapshot_date) from fct_repo_daily) for current numbers. "
+            "star_count, fork_count and open_issue_count are already numbers per repo: to rank "
+            "repos by one of them, order by that column itself (never by count(*))."
         ),
     },
     {

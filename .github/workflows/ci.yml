@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Unit tests
+        run: pytest -q
+
+      # Real data is git-ignored, so build the dbt project on a tiny fixture dataset.
+      # This runs every model and all the dbt tests (unique, not_null, relationships, grain).
+      - name: dbt build on fixture data
+        run: |
+          python tests/fixtures/make_bronze.py
+          cd transform
+          dbt build --profiles-dir .
