@@ -6,3 +6,4 @@ data/
 transform/target/
 transform/logs/
 transform/.user.yml
+orchestration/logs/
