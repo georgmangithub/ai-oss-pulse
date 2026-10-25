@@ -4,3 +4,5 @@ pytest
 deltalake
 pyarrow
 duckdb
+dbt-core
+dbt-duckdb

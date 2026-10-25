@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: stg_github_repos
+    description: Typed, renamed GitHub repo snapshots. One row per repo per snapshot date.
+    columns:
+      - name: repo_key
+        data_tests: [not_null]
+      - name: snapshot_date
+        data_tests: [not_null]
+      - name: star_count
+        data_tests: [not_null]
+
+  - name: stg_arxiv_papers
+    description: Cleaned arXiv papers per snapshot date.
+    columns:
+      - name: arxiv_id
+        data_tests: [not_null]
+      - name: title
+        data_tests: [not_null]

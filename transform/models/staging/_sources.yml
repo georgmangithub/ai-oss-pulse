@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: Raw-but-typed Delta tables written by the ingestion layer.
+    meta:
+      external_location: "delta_scan('../data/lakehouse/bronze/{name}')"
+    tables:
+      - name: github_repos
+        description: One row per repo per ingestion date (dt).
+      - name: arxiv_papers
+        description: One row per paper per ingestion date (dt).

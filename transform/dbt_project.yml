@@ -1,0 +1,16 @@
+name: ai_oss_pulse
+version: "1.0.0"
+profile: ai_oss_pulse
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+
+models:
+  ai_oss_pulse:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table

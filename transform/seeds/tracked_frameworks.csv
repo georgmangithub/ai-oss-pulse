@@ -1,0 +1,11 @@
+full_name,framework_name,category
+langchain-ai/langchain,LangChain,orchestration
+langchain-ai/langgraph,LangGraph,agent-framework
+crewAIInc/crewAI,CrewAI,agent-framework
+openai/openai-agents-python,OpenAI Agents SDK,agent-framework
+google/adk-python,Google ADK,agent-framework
+pydantic/pydantic-ai,PydanticAI,agent-framework
+run-llama/llama_index,LlamaIndex,rag
+deepset-ai/haystack,Haystack,rag
+Significant-Gravitas/AutoGPT,AutoGPT,autonomous-agent
+langgenius/dify,Dify,llm-app-platform

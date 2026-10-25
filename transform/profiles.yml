@@ -1,0 +1,8 @@
+ai_oss_pulse:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/lakehouse/warehouse.duckdb
+      extensions:
+        - delta

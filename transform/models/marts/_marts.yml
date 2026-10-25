@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: dim_repo
+    description: One row per GitHub repo with its latest attributes.
+    columns:
+      - name: repo_key
+        description: Lower-cased owner/name, the join key across tables.
+        data_tests: [unique, not_null]
+
+  - name: fct_repo_daily
+    description: "Grain: one row per repo per snapshot date. Star-change columns are null until enough history exists."
+    columns:
+      - name: repo_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_repo')
+                field: repo_key
+      - name: star_count
+        data_tests: [not_null]
+
+  - name: fct_papers
+    description: One row per arXiv paper.
+    columns:
+      - name: arxiv_id
+        data_tests: [unique, not_null]
+      - name: primary_category
+        data_tests: [not_null]
+
+  - name: mart_framework_momentum
+    description: Latest star counts and growth for the curated frameworks in the tracked_frameworks seed.
+    columns:
+      - name: framework_name
+        data_tests: [unique, not_null]
+
+seeds:
+  - name: tracked_frameworks
+    columns:
+      - name: full_name
+        data_tests: [unique, not_null]
